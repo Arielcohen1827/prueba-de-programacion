@@ -1,0 +1,12 @@
+from .paciente import Paciente as pacienteResource
+from .paciente import Pacientes as pacientesResource
+from .profesional import profecional as profecionalResource
+from .profesional import profecionales as profecionalesResource
+from .ficha import Ficha as fichaResource
+from .ficha import Fichas as fichasResource
+from .planes import Plan as planResource
+from .planes import Planes as planesResource
+from .notificaciones import notificacion as notificacionResource
+from .login import login as loginResource
+from .logout import Logout as logoutResource
+from .register import Register as registerResource
