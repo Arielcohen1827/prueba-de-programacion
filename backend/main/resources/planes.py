@@ -1,49 +1,47 @@
-from flask import request
+from flask import request, jsonify
 from flask_restful import Resource
-
-PLANES = {
-    1: {      
-        'descripcion': 'Tratamiento para recuperación de rodilla',
-        'ejercicios': ['Elongación de isquios', 'Sentadillas asistidas'], 
-        'estado': 'Activo'          
-    },
-    2: {       
-        'descripcion': 'Rehabilitación post-operatoria de hombro',
-        'ejercicios': ['Rotacion externa con banda', 'Movilidad escapular'],
-        'estado': 'Pendiente'
-    }
-}
+from .. import db
+from ..models.plan import Plan as PlanModel
 
 class Plan(Resource):
-    # GET: Obtener un plan de tratamiento
+    # GET /plan/<id> - Obtener un plan por ID
     def get(self, id):
-        if int(id) in PLANES:
-            return PLANES[int(id)], 200
-        return 'El plan no existe', 404
+        plan = db.session.query(PlanModel).get_or_404(id)
+        return plan.to_json(), 200
 
-    # PUT: Modificar un plan (o cancelar si eres USER)
+    # PUT /plan/<id> - Actualizar un plan
     def put(self, id):
-        if int(id) in PLANES:
-            data = request.get_json()
-            PLANES[int(id)].update(data)
-            return 'Plan actualizado', 200
-        return 'El plan no existe', 404
+        plan = db.session.query(PlanModel).get_or_404(id)
+        data = request.get_json().items()
+        for key, value in data:
+            setattr(plan, key, value)
+        db.session.add(plan)
+        db.session.commit()
+        return plan.to_json(), 200
 
-    # DELETE: Eliminar un plan
+    # DELETE /plan/<id> - Eliminar un plan
     def delete(self, id):
-        if int(id) in PLANES:
-            del PLANES[int(id)]
-            return 'Plan eliminado', 200
-        return 'El plan no existe', 404
+        plan = db.session.query(PlanModel).get_or_404(id)
+        db.session.delete(plan)
+        db.session.commit()
+        return {'message': 'Plan eliminado con éxito'}, 200
 
 class Planes(Resource):
-    # GET: Obtener todos los planes 
+    # GET /planes - Obtener todos los planes
     def get(self):
-        return PLANES, 200
+        params = request.args
+        query = db.session.query(PlanModel)
+        if 'descripcion' in params:
+            descripcion = params.get('descripcion', '').strip()
+            query = query.filter(PlanModel.descripcion.ilike(f"%{descripcion}%"))
+        if 'estado' in params:
+            estado = params.get('estado', '').strip()
+            query = query.filter(PlanModel.estado.ilike(f"%{estado}%"))
+        return jsonify({'planes': [plan.to_json() for plan in query.all()]})
 
-    # POST: Crear un plan de tratamiento
+    # POST /planes - Crear un nuevo plan
     def post(self):
-        data = request.get_json()
-        nuevo_id = int(max(PLANES.keys())) + 1 if PLANES else 1
-        PLANES[nuevo_id] = data
-        return PLANES[nuevo_id], 201
+        plan = PlanModel.from_json(request.get_json())
+        db.session.add(plan)
+        db.session.commit()
+        return plan.to_json(), 201

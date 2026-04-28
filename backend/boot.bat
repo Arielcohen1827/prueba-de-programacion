@@ -7,6 +7,9 @@ cd
 echo Activando entorno...
 call venv\Scripts\activate
 
+echo Instalando requerimientos...
+pip install -r requirements.txt
+
 echo Ejecutando app...
 python app.py
 

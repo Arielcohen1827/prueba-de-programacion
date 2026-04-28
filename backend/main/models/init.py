@@ -1,0 +1,11 @@
+from .usuario import Usuario as UsuarioModel
+from .paciente import Paciente as PacienteModel
+from .profesional import Profesional as ProfesionalModel
+from .especialidad import Especialidad as EspecialidadModel
+from .turno import Turno as TurnoModel
+from .plan import Plan as PlanModel
+from .planes_ejercicio import PlanesEjercicios as PlanesEjerciciosModel
+from .ejercicio import Ejercicio as EjercicioModel
+from .ficha import Ficha as FichaModel
+from .notificacion import Notificacion as NotificacionModel
+from .evaluacion import Evaluacion as EvaluacionModel
